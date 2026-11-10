@@ -1,0 +1,29 @@
+name: "EnvGate Lite: .env.example check"
+description: "Fail the job when keys from .env.example are missing from an env file or the job's environment. Zero dependencies; never prints values."
+author: "Emilio Straubel"
+branding:
+  icon: "shield"
+  color: "green"
+inputs:
+  example:
+    description: "Path to the template file that lists required keys."
+    required: false
+    default: ".env.example"
+  env-file:
+    description: "Optional path to an env file. A key counts as present if it is in this file OR in the job's environment variables."
+    required: false
+    default: ""
+  fail-on-empty:
+    description: "If 'true', keys that are present but empty in every source also fail the job."
+    required: false
+    default: "false"
+outputs:
+  ok:
+    description: "'true' if the check passed, otherwise 'false'."
+  missing:
+    description: "Comma-separated names of missing keys (names only, never values)."
+  empty:
+    description: "Comma-separated names of empty keys (only reported when fail-on-empty is 'true')."
+runs:
+  using: "node24"
+  main: "src/main.js"

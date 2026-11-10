@@ -1,0 +1,73 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - run: node --test
+
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Pass case (env file)
+        uses: ./
+        with:
+          example: test/fixtures/.env.example
+          env-file: test/fixtures/complete.env
+          fail-on-empty: "true"
+
+      - name: Pass case (job environment variables only)
+        uses: ./
+        with:
+          example: test/fixtures/.env.example
+        env:
+          APP_NAME: demo
+          DATABASE_URL: postgres://localhost/demo
+          API_KEY: fake-key
+
+      - name: Fail case (missing key) - expected to fail
+        id: missing
+        continue-on-error: true
+        uses: ./
+        with:
+          example: test/fixtures/.env.example
+          env-file: test/fixtures/partial.env
+
+      - name: Fail case (empty key) - expected to fail
+        id: empty
+        continue-on-error: true
+        uses: ./
+        with:
+          example: test/fixtures/.env.example
+          env-file: test/fixtures/partial.env
+          fail-on-empty: "true"
+        env:
+          DATABASE_URL: postgres://localhost/demo
+
+      - name: Assert fail cases failed for the right reasons
+        env:
+          MISSING_OUTCOME: ${{ steps.missing.outcome }}
+          MISSING_KEYS: ${{ steps.missing.outputs.missing }}
+          EMPTY_OUTCOME: ${{ steps.empty.outcome }}
+          EMPTY_KEYS: ${{ steps.empty.outputs.empty }}
+        run: |
+          test "$MISSING_OUTCOME" = "failure"
+          test "$MISSING_KEYS" = "DATABASE_URL"
+          test "$EMPTY_OUTCOME" = "failure"
+          test "$EMPTY_KEYS" = "API_KEY"
+          echo "Fail cases behaved as expected."

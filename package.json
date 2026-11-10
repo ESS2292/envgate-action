@@ -1,0 +1,13 @@
+{
+  "name": "envgate-action",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Free GitHub Action: fail CI when keys from .env.example are missing. Zero dependencies.",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": { "node": ">=18" },
+  "author": "Emilio Straubel",
+  "license": "MIT"
+}
