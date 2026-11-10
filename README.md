@@ -142,7 +142,7 @@ The action runs on the `node24` runtime, which GitHub-hosted runners require for
 
 ## Related
 
-EnvGate checks environment variables. For Node.js version pins that drift across `.nvmrc`, Docker, and `setup-node`, the free [RuntimeGate Lite Action](https://github.com/ESS2292/runtimegate-action) fails the job when those declarations disagree.
+EnvGate checks environment variables. For Node.js version pins that drift across `.nvmrc`, Docker, and `setup-node`, the free [RuntimeGate Lite Action](https://github.com/ESS2292/runtimegate-action) fails the job when those declarations disagree. For mixed lockfiles or an unfrozen `npm install` in CI, the free [LockGate Lite Action](https://github.com/ESS2292/lockgate-action) fails the job when the install is not frozen.
 
 ## License
 
