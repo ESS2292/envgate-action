@@ -140,6 +140,10 @@ The action runs on the `node24` runtime, which GitHub-hosted runners require for
 - [Validate .env against .env.example in CI](https://ess2292.github.io/envgate/guides/validate-env-against-env-example-in-ci.html)
 - [EnvGate Lite vs the CLI, dotenv, and schema validators](https://ess2292.github.io/envgate/guides/envgate-lite-vs-cli-and-dotenv.html)
 
+## Related
+
+EnvGate checks environment variables. For Node.js version pins that drift across `.nvmrc`, Docker, and `setup-node`, the free [RuntimeGate Lite Action](https://github.com/ESS2292/runtimegate-action) fails the job when those declarations disagree.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
