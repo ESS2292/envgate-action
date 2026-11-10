@@ -1,12 +1,12 @@
-name: "EnvGate Lite: .env.example check"
-description: "Fail the job when keys from .env.example are missing from an env file or the job's environment. Zero dependencies; never prints values."
+name: "EnvGate Lite: required env check"
+description: "Fail the job when keys from .env.example (or .env.sample / .env.template) are missing from an env file or the job's environment. Zero dependencies; never prints values."
 author: "Emilio Straubel"
 branding:
   icon: "shield"
   color: "green"
 inputs:
   example:
-    description: "Path to the template file that lists required keys."
+    description: "Path to the template file that lists required keys. If this is .env.example and the file is missing, the action also tries .env.sample and .env.template in the same directory."
     required: false
     default: ".env.example"
   env-file:

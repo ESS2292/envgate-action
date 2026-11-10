@@ -12,6 +12,29 @@ function getInput(name, env) {
   return v === undefined ? '' : String(v).trim();
 }
 
+/**
+ * If the requested example path is missing and its basename is
+ * .env.example, try .env.sample then .env.template in the same directory.
+ * dotenv-safe documents both .env.sample and .env.example.
+ */
+function resolveExample(cwd, examplePath) {
+  const requested = examplePath || '.env.example';
+  const abs = path.resolve(cwd, requested);
+  if (fs.existsSync(abs)) {
+    return { requested, path: requested, abs, fallback: false };
+  }
+  if (path.basename(requested) === '.env.example') {
+    for (const name of ['.env.sample', '.env.template']) {
+      const altAbs = path.join(path.dirname(abs), name);
+      if (fs.existsSync(altAbs)) {
+        const rel = path.relative(cwd, altAbs).replace(/\\/g, '/') || name;
+        return { requested, path: rel, abs: altAbs, fallback: true };
+      }
+    }
+  }
+  return { requested, path: requested, abs, fallback: false, missing: true };
+}
+
 // Escape data for GitHub workflow commands (::error:: etc.).
 function escapeData(s) {
   return String(s).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
@@ -62,7 +85,9 @@ function buildSummary({ result, examplePath, envFile, failOnEmpty, fatal }) {
 function run(env = process.env, io = {}) {
   const log = io.log || ((s) => process.stdout.write(s + '\n'));
   const cwd = io.cwd || env.GITHUB_WORKSPACE || process.cwd();
-  const examplePath = getInput('example', env) || '.env.example';
+  const requestedExample = getInput('example', env) || '.env.example';
+  const resolved = resolveExample(cwd, requestedExample);
+  const examplePath = resolved.path;
   const envFile = getInput('env-file', env);
   const failOnEmpty = parseBool(getInput('fail-on-empty', env));
 
@@ -75,9 +100,12 @@ function run(env = process.env, io = {}) {
 
   let exampleText;
   try {
-    exampleText = fs.readFileSync(path.resolve(cwd, examplePath), 'utf8');
+    exampleText = fs.readFileSync(resolved.abs, 'utf8');
   } catch {
-    return fail(`Example file not found or unreadable: ${examplePath}`);
+    return fail(`Example file not found or unreadable: ${requestedExample}`);
+  }
+  if (resolved.fallback) {
+    log(`EnvGate Lite: using ${examplePath} (${requestedExample} was not found).`);
   }
   const requiredKeys = [...parseEnv(exampleText).keys()];
 
@@ -112,7 +140,7 @@ function run(env = process.env, io = {}) {
   return result.ok ? 0 : 1;
 }
 
-module.exports = { run, getInput, escapeData, buildSummary };
+module.exports = { run, getInput, escapeData, buildSummary, resolveExample };
 
 if (require.main === module) {
   process.exitCode = run();

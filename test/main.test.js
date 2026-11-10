@@ -96,3 +96,52 @@ test('entrypoint runs as a process with hyphenated INPUT_ names', () => {
   assert.equal(p.status, 1);
   assert.match(p.stdout, /DATABASE_URL/);
 });
+
+
+test('falls back to .env.sample when .env.example is missing', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'envgate-action-sample-'));
+  fs.writeFileSync(path.join(dir, '.env.sample'), 'APP_NAME=\nDATABASE_URL=\nAPI_KEY=\n');
+  const { summary, output } = tmpFiles();
+  const logs = [];
+  const code = run({
+    GITHUB_STEP_SUMMARY: summary,
+    GITHUB_OUTPUT: output,
+    INPUT_EXAMPLE: '.env.example',
+    APP_NAME: 'a',
+    DATABASE_URL: 'b',
+    API_KEY: 'c',
+  }, { log: (s) => logs.push(s), cwd: dir });
+  assert.equal(code, 0);
+  assert.match(logs.join('\n'), /\.env\.sample/);
+  assert.match(fs.readFileSync(output, 'utf8'), /^ok=true$/m);
+});
+
+test('falls back to .env.template when .env.example and .env.sample are missing', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'envgate-action-template-'));
+  fs.writeFileSync(path.join(dir, '.env.template'), 'APP_NAME=\nDATABASE_URL=\nAPI_KEY=\n');
+  const { summary, output } = tmpFiles();
+  const code = run({
+    GITHUB_STEP_SUMMARY: summary,
+    GITHUB_OUTPUT: output,
+    INPUT_EXAMPLE: '.env.example',
+    APP_NAME: 'a',
+    DATABASE_URL: 'b',
+    API_KEY: 'c',
+  }, { log: () => {}, cwd: dir });
+  assert.equal(code, 0);
+  assert.match(fs.readFileSync(output, 'utf8'), /^ok=true$/m);
+});
+
+test('does not fall back when a custom example path is missing', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'envgate-action-custom-'));
+  fs.writeFileSync(path.join(dir, '.env.sample'), 'APP_NAME=\n');
+  const { summary, output } = tmpFiles();
+  const logs = [];
+  const code = run({
+    GITHUB_STEP_SUMMARY: summary,
+    GITHUB_OUTPUT: output,
+    INPUT_EXAMPLE: 'custom.env',
+  }, { log: (s) => logs.push(s), cwd: dir });
+  assert.equal(code, 1);
+  assert.match(logs.join('\n'), /custom\.env/);
+});

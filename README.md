@@ -6,6 +6,8 @@
 
 Fail a GitHub Actions job when a key listed in `.env.example` isn't set.
 
+If `.env.example` is missing, the action also looks for `.env.sample` and then `.env.template` in the same directory (the names [dotenv-safe](https://github.com/motdotla/dotenv-safe) documents as committed templates).
+
 Missing environment variables are an easy way to break a deploy: someone adds `STRIPE_WEBHOOK_SECRET` to the code and to `.env.example`, but nobody adds it to the CI secrets or the production env file. This action reads the key names from your `.env.example` and checks that each one is set, either in an env file you point it at or in the job's environment variables (which is where GitHub Actions secrets usually end up).
 
 - **Zero dependencies.** Plain Node.js, nothing to install, nothing in `node_modules`.
@@ -91,7 +93,7 @@ Turn `fail-on-empty: "true"` on even for same-repo runs. A secret you forgot to 
 
 | Input | Default | Description |
 | --- | --- | --- |
-| `example` | `.env.example` | Template file listing the required keys. Values in it are ignored. |
+| `example` | `.env.example` | Template file listing the required keys. Values in it are ignored. If this path is `.env.example` and that file is missing, the action tries `.env.sample` and then `.env.template` in the same directory. |
 | `env-file` | *(none)* | Optional env file to check, in addition to the job's environment variables. |
 | `fail-on-empty` | `false` | When `true`, keys that are set but empty (or whitespace) in every source also fail. |
 
