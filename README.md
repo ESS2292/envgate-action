@@ -12,6 +12,12 @@ Missing environment variables are an easy way to break a deploy: someone adds `S
 - **Never prints values.** Logs, annotations, outputs, and the job summary contain key names only.
 - **Free and MIT-licensed.**
 
+## Demo
+
+![EnvGate Lite and the EnvGate CLI: a missing or empty key fails the check; the same check passes once the key is set.](docs/envgate-demo.gif)
+
+Recorded from the real Action entrypoint and the EnvGate CLI. Demo values are synthetic. Values are never printed.
+
 ## Usage
 
 ### Check secrets passed as environment variables
@@ -130,6 +136,8 @@ The action runs on the `node24` runtime, which GitHub-hosted runners require for
 ## Guides
 
 - [Catch missing environment variables in GitHub Actions](https://ess2292.github.io/envgate/guides/github-actions-missing-env-vars.html)
+- [GitHub Actions secret is empty: why and how to fail fast](https://ess2292.github.io/envgate/guides/github-actions-empty-secrets.html)
+- [Validate .env against .env.example in CI](https://ess2292.github.io/envgate/guides/validate-env-against-env-example-in-ci.html)
 - [EnvGate Lite vs the CLI, dotenv, and schema validators](https://ess2292.github.io/envgate/guides/envgate-lite-vs-cli-and-dotenv.html)
 
 ## License
